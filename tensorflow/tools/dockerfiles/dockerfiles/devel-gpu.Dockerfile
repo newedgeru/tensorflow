@@ -142,3 +142,14 @@ RUN mkdir /bazel && \
 
 COPY bashrc /etc/bash.bashrc
 RUN chmod a+rwx /etc/bash.bashrc
+
+RUN apt-get install git -y && git clone --recursive https://github.com/apache/tvm tvm && apt-get update \
+    && apt-get install -y python3 python3-dev python3-setuptools gcc libtinfo-dev zlib1g-dev build-essential cmake libedit-dev libxml2-dev \
+    && chmod a+w+r tvm && cd tvm && mkdir build && cp cmake/config.cmake build && cd build \
+    && sed -i -e 's/set(USE_LLVM ON)/set(USE_LLVM OFF)/g' config.cmake \
+    && sed -i -e 's/set(USE_CUDA OFF)/set(USE_CUDA ON)/g' config.cmake \
+    && sed -i -e 's/set(USE_CUDNN OFF)/set(USE_CUDNN ON)/g' config.cmake \
+    && cmake .. \
+    && make -j4 \
+    && cd .. && cd python \
+    && python setup.py install
